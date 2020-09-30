@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.util.HashMap;
 import java.util.Map;
-
+// Once again this sample class from LavaPlayer was usable with very few modifications, which I will point out below:
 public class PlayerManager {
     private static PlayerManager INSTANCE;
     private final AudioPlayerManager playermanager;
@@ -54,12 +54,17 @@ public class PlayerManager {
                 }
                 channel.sendMessage("Adding to queue... " + firstTrack.getInfo().title).queue();
                 play(musicManager, firstTrack);
+                //After I add the first track of a playlist to the queue, I check whether or not this playlist was created via search results.]
+                //If yes, I remove all the tracks in the playlist. Thus only the first result is queued. If I do not do it in this way, the queue is filled with
+                //every search result that pops up from ytsearch.
                 if (playlist.isSearchResult()) {
                     int arraysize = playlist.getTracks().size();
                     for (int i = 0; i <= arraysize; i++){
                         playlist.getTracks().remove(i);
                     }
                 }
+                //This happens regardless of whether or not it's a search result, if I checked whether it was a search result after doing this the songs would be queued regardless
+                //of my culling of the playlist.
                 playlist.getTracks().forEach(musicManager.scheduler::queue);
 
             }

@@ -12,6 +12,8 @@ import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+//This class utilizes lavaplayer/was very much just the sample TrackScheduler class on the Lavaplayer github, albeit with slight tweaks to better fit my queue functionality
+
 /**
  * This class schedules tracks for the audio player. It contains the queue of tracks.
  */
@@ -26,7 +28,8 @@ public class TrackScheduler extends AudioEventAdapter {
         this.player = player;
         this.queue = new LinkedBlockingQueue<>();
     }
-
+// This function allows me to list the queue using an iterator. Originally there was no getList function,
+// however that and making the queue a BlockingQueue are the only changes I made
     public ArrayList<AudioTrack> getList() {
         Iterator<AudioTrack> i = queue.iterator();
         ArrayList<AudioTrack> al = new ArrayList<>();
