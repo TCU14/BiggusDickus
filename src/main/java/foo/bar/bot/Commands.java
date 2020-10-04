@@ -43,20 +43,24 @@ public class Commands extends ListenerAdapter {
         String[] args = event.getMessage().getContentRaw().split("\\s+");
 //Add the command triggers, (args[0] = First word in a message, args[1] = second word, etc. Above this comment I used
         // \\s to split up the arguments so that we can differentiate/utilize them properly
-
+//And here we have a series of if statements/else-if's to detect commands.
         if (args[0].equalsIgnoreCase(main.prefix + "ping")) {
             event.getChannel().sendMessage("pong! Biggus Dickus lives on").queue();
-        } else if (args[0].equalsIgnoreCase(main.prefix + "info")) {
+        }
+        //if command is !rping, send message to text channel where command was executed
+        else if (args[0].equalsIgnoreCase(main.prefix + "info")) {
             EmbedBuilder info = new EmbedBuilder();
             info.setColor(Color.red);
-            info.setTitle("Biggus Dickus Bot version 1.8");
+            info.setTitle("Biggus Dickus Bot version 1.9");
             info.setColor(Color.cyan);
             info.setDescription("Bot is still in active development and as such there may be bugs. Please report any and all issues on my Github." +
-                    "But also check for duplicates beforehand in case I was already made aware of your issue");
+                    "But also check for duplicates beforehand in case I was already made aware of your issue. [Github can be found here](https://github.com/TCU14/BiggusDickus)");
             info.setAuthor("Red The Moron");
             event.getChannel().sendMessage(info.build()).queue();
             info.clear();
-        } else if (args[0].equalsIgnoreCase(main.prefix + "print")) {
+        }
+        //Copies the original message, using substring to remove the command !rprint, and then surrounds it in ``` to put it in a code block
+        else if (args[0].equalsIgnoreCase(main.prefix + "print")) {
             if (args[1].equalsIgnoreCase("yes")) {
                 event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(12) + "```").queue();
                 event.getMessage().delete().queue();
@@ -66,7 +70,9 @@ public class Commands extends ListenerAdapter {
                 event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(8) + "```").queue();
 
             }
-        } else if (args[0].equalsIgnoreCase(main.prefix + "pp")) {
+        }
+        // Meme command that uses Java's random function to generate a 8==D of a random size. RNG and discord embeds ftw
+        else if (args[0].equalsIgnoreCase(main.prefix + "pp")) {
             EmbedBuilder newpp = new EmbedBuilder();
             int pplength = 0;
             String len = "";
@@ -77,7 +83,9 @@ public class Commands extends ListenerAdapter {
             newpp.setTitle(event.getAuthor().getName() + "'s pp");
             newpp.setDescription("8" + len + "D");
             event.getChannel().sendMessage(newpp.build()).queue();
-        } else if (args[0].equalsIgnoreCase(main.prefix + "eightball") || args[0].equalsIgnoreCase(main.prefix + "8ball")) {
+        }
+        //This also uses java's random function but it acts as a magic 8ball.
+        else if (args[0].equalsIgnoreCase(main.prefix + "eightball") || args[0].equalsIgnoreCase(main.prefix + "8ball")) {
             String[] responses = {"It is certain", "Without a doubt", "You may rely on it", "Yes definitely", "It is decidedly so",
                     "As I see it, yes", "Most likely", "Yes", "Outlook good", "Signs point to yes", "Reply hazy try again",
                     "Better not tell you now", "Ask again later", "Cannot predict now", "Concentrate and ask again",
@@ -86,16 +94,24 @@ public class Commands extends ListenerAdapter {
             int answer = 0;
             answer = random.nextInt(20);
             event.getChannel().sendMessage(responses[answer]).queue();
-        } else if (args[0].equalsIgnoreCase(main.prefix + "play")) {
+        }
+        // If there is no playerManager instance already, one is created. It then determines which voice channel
+        // the one executing the command is located in.  It then gets the AudioManager, and uses the LoadAndPlay function
+        // to play a song searched by the user (!rplay search (SONGNAME))
+        else if (args[0].equalsIgnoreCase(main.prefix + "play")) {
             if (args[1].equalsIgnoreCase("search")){
                 PlayerManager manager = PlayerManager.getINSTANCE();
                 VoiceChannel connectedChannel = event.getMember().getVoiceState().getChannel();
                 AudioManager audioManager = event.getGuild().getAudioManager();
                 audioManager.openAudioConnection(connectedChannel);
                 String Query = "";
+                //Substring allows me to ignore everything leading up to the search query by splitting the original message into substrings. Since I don't want the !rplay search command factoring
+                //into search results, this is very helpful to me
                 Query = event.getMessage().getContentRaw().substring(14);
                 manager.LoadAndPlay(event.getChannel(), "ytsearch:" + Query);
             }
+            // If you do not have your first argument as being "search", it assumes you instead provided a direct URL to the song from
+            // YouTube or SoundCloud.
             else {
                 PlayerManager manager = PlayerManager.getINSTANCE();
                 VoiceChannel connectedChannel = event.getMember().getVoiceState().getChannel();
@@ -104,23 +120,34 @@ public class Commands extends ListenerAdapter {
                 manager.LoadAndPlay(event.getChannel(), args[1]);
                 manager.getGuildMusicManager(event.getGuild()).player.setVolume(10);
             }
-        } else if (args[0].equalsIgnoreCase(main.prefix + "volup")) {
+        }
+        //Just grabs the music manager and adjusts the volume
+        else if (args[0].equalsIgnoreCase(main.prefix + "volup")) {
             PlayerManager manager = PlayerManager.getINSTANCE();
             manager.getGuildMusicManager(event.getGuild()).player.setVolume(manager.getGuildMusicManager(event.getGuild()).player.getVolume() + 10);
-        } else if (args[0].equalsIgnoreCase(main.prefix + "voldown")) {
+        }
+        //Same thing as above but subtracts the volume as opposed to adding to it
+        else if (args[0].equalsIgnoreCase(main.prefix + "voldown")) {
             PlayerManager manager = PlayerManager.getINSTANCE();
             manager.getGuildMusicManager(event.getGuild()).player.setVolume(manager.getGuildMusicManager(event.getGuild()).player.getVolume() - 10);
-        } else if (args[0].equalsIgnoreCase(main.prefix + "disconnect") || args[0].equalsIgnoreCase(main.prefix + "dis")) {
+        }
+        //Closes the connection to the voice chat/audio channel
+        else if (args[0].equalsIgnoreCase(main.prefix + "disconnect") || args[0].equalsIgnoreCase(main.prefix + "dis")) {
             AudioManager audioManager = event.getGuild().getAudioManager();
             audioManager.closeAudioConnection();
-        } else if (args[0].equalsIgnoreCase(main.prefix + "skip")) {
+        }
+        //Sends message letting the user know the song has been skipped, and then runs the nextTrack function from my TrackScheduler class
+        else if (args[0].equalsIgnoreCase(main.prefix + "skip")) {
             TextChannel channel = event.getChannel();
             PlayerManager playerManager = PlayerManager.getINSTANCE();
             GuildMusicManager musicManager = playerManager.getGuildMusicManager(event.getGuild());
             event.getChannel().sendMessage("Skipped " + musicManager.player.getPlayingTrack().getInfo().title).queue();
             musicManager.scheduler.nextTrack();
 
-        } else if (args[0].equalsIgnoreCase(main.prefix + "queue")) {
+        }
+        //Sends current music queue as well as the currently playing song, it took me forever to figure out how to properly implement this
+        //The queue was created as a BlockingQueue in TrackScheduler, originally it was a linked list but I had issues with that
+        else if (args[0].equalsIgnoreCase(main.prefix + "queue")) {
             PlayerManager playerManager = PlayerManager.getINSTANCE();
             GuildMusicManager musicManager = playerManager.getGuildMusicManager(event.getGuild());
             if (musicManager.player.getPlayingTrack() != null) {
@@ -147,18 +174,23 @@ public class Commands extends ListenerAdapter {
                 }
             }
 
-        } else if (args[0].equalsIgnoreCase(main.prefix + "clear")) {
+        }
+        //Runs the clear function from TrackScheduler (This just does queue.clear() )
+        else if (args[0].equalsIgnoreCase(main.prefix + "clear")) {
             PlayerManager playerManager = PlayerManager.getINSTANCE();
             GuildMusicManager musicManager = playerManager.getGuildMusicManager(event.getGuild());
             musicManager.scheduler.clear();
             event.getChannel().sendMessage("Queue has been cleared!").queue();
-        } else if (args[0].equalsIgnoreCase(main.prefix + "stop")) {
+        }
+        //This stops the current track
+        else if (args[0].equalsIgnoreCase(main.prefix + "stop")) {
             PlayerManager playerManager = PlayerManager.getINSTANCE();
             GuildMusicManager musicManager = playerManager.getGuildMusicManager(event.getGuild());
             event.getChannel().sendMessage(musicManager.player.getPlayingTrack().getInfo().title + " has been stopped");
             musicManager.player.stopTrack();
-
         }
+        //All of the classes within the image package use very similar code, and could honestly have been condensed into OOP code with overrides. However
+        //subjectively I felt this was a cleaner approach/looked better, as it would be weird in my opinion to have everything inherit from a parent "imagesample" class
         else if (args[0].equalsIgnoreCase(main.prefix + "fox")){
             event.getChannel().sendMessage(getFox()).queue();
         }
@@ -180,6 +212,7 @@ public class Commands extends ListenerAdapter {
         else if (args[0].equalsIgnoreCase(main.prefix + "redpanda")){
             event.getChannel().sendMessage(getRPanda()).queue();
         }
+        //If your command prefix !r is given with no args, it gives you a help screen.
         else if (args[0].equalsIgnoreCase(main.prefix)){
             EmbedBuilder help = new EmbedBuilder();
             help.setColor(Color.red);
@@ -197,6 +230,7 @@ public class Commands extends ListenerAdapter {
             help.setAuthor("Biggus Dickus");
             event.getChannel().sendMessage(help.build()).queue();
         }
+        // !r2 gives you page two of my help screen
         else if (args[0].equalsIgnoreCase(main.prefix + "2")){
                 EmbedBuilder help = new EmbedBuilder();
                 help.setColor(Color.red);
