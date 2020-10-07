@@ -34,219 +34,207 @@ import static foo.bar.bot.image.Panda.getPanda;
 import static foo.bar.bot.image.RedPanda.getRPanda;
 
 public class Commands extends ListenerAdapter {
-    public static void GenerateRandomPP(){
+    public static void GenerateRandomPP() {
         int pplength = 0;
         Random random = new Random();
         pplength = random.nextInt(13);
     }
+
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
         String[] args = event.getMessage().getContentRaw().split("\\s+");
 //Add the command triggers, (args[0] = First word in a message, args[1] = second word, etc. Above this comment I used
         // \\s to split up the arguments so that we can differentiate/utilize them properly
 //And here we have a series of if statements/else-if's to detect commands.
-        if (args[0].equalsIgnoreCase(main.prefix + "ping")) {
-            event.getChannel().sendMessage("pong! Biggus Dickus lives on").queue();
-        }
-        //if command is !rping, send message to text channel where command was executed
-        else if (args[0].equalsIgnoreCase(main.prefix + "info")) {
-            EmbedBuilder info = new EmbedBuilder();
-            info.setColor(Color.red);
-            info.setTitle("Biggus Dickus Bot version 1.9");
-            info.setColor(Color.cyan);
-            info.setDescription("Bot is still in active development and as such there may be bugs. Please report any and all issues on my Github." +
-                    "But also check for duplicates beforehand in case I was already made aware of your issue. [Github can be found here](https://github.com/TCU14/BiggusDickus)");
-            info.setAuthor("Red The Moron");
-            event.getChannel().sendMessage(info.build()).queue();
-            info.clear();
-        }
-        //Copies the original message, using substring to remove the command !rprint, and then surrounds it in ``` to put it in a code block
-        else if (args[0].equalsIgnoreCase(main.prefix + "print")) {
-            if (args[1].equalsIgnoreCase("yes")) {
-                event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(12) + "```").queue();
-                event.getMessage().delete().queue();
-            } else if (args[1].equalsIgnoreCase("no")) {
-                event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(11) + "```").queue();
-            } else {
-                event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(8) + "```").queue();
-
-            }
-        }
-        // Meme command that uses Java's random function to generate a 8==D of a random size. RNG and discord embeds ftw
-        else if (args[0].equalsIgnoreCase(main.prefix + "pp")) {
-            EmbedBuilder newpp = new EmbedBuilder();
-            int pplength = 0;
-            String len = "";
-            Random random = new Random();
-            pplength = random.nextInt(13);
-            len = new String(new char[pplength]).replace("\0", "=");
-            newpp.setColor(Color.red);
-            newpp.setTitle(event.getAuthor().getName() + "'s pp");
-            newpp.setDescription("8" + len + "D");
-            event.getChannel().sendMessage(newpp.build()).queue();
-        }
-        //This also uses java's random function but it acts as a magic 8ball.
-        else if (args[0].equalsIgnoreCase(main.prefix + "eightball") || args[0].equalsIgnoreCase(main.prefix + "8ball")) {
-            String[] responses = {"It is certain", "Without a doubt", "You may rely on it", "Yes definitely", "It is decidedly so",
-                    "As I see it, yes", "Most likely", "Yes", "Outlook good", "Signs point to yes", "Reply hazy try again",
-                    "Better not tell you now", "Ask again later", "Cannot predict now", "Concentrate and ask again",
-                    "Don’t count on it", "Outlook not so good", "My sources say no", "Very doubtful", "My reply is no"};
-            Random random = new Random();
-            int answer = 0;
-            answer = random.nextInt(20);
-            event.getChannel().sendMessage(responses[answer]).queue();
-        }
-        // If there is no playerManager instance already, one is created. It then determines which voice channel
-        // the one executing the command is located in.  It then gets the AudioManager, and uses the LoadAndPlay function
-        // to play a song searched by the user (!rplay search (SONGNAME))
-        else if (args[0].equalsIgnoreCase(main.prefix + "play")) {
-            if (args[1].equalsIgnoreCase("search")){
-                PlayerManager manager = PlayerManager.getINSTANCE();
-                VoiceChannel connectedChannel = event.getMember().getVoiceState().getChannel();
-                AudioManager audioManager = event.getGuild().getAudioManager();
-                audioManager.openAudioConnection(connectedChannel);
-                String Query = "";
-                //Substring allows me to ignore everything leading up to the search query by splitting the original message into substrings. Since I don't want the !rplay search command factoring
-                //into search results, this is very helpful to me
-                Query = event.getMessage().getContentRaw().substring(14);
-                manager.LoadAndPlay(event.getChannel(), "ytsearch:" + Query);
-            }
-            // If you do not have your first argument as being "search", it assumes you instead provided a direct URL to the song from
-            // YouTube or SoundCloud.
-            else {
-                PlayerManager manager = PlayerManager.getINSTANCE();
-                VoiceChannel connectedChannel = event.getMember().getVoiceState().getChannel();
-                AudioManager audioManager = event.getGuild().getAudioManager();
-                audioManager.openAudioConnection(connectedChannel);
-                manager.LoadAndPlay(event.getChannel(), args[1]);
-                manager.getGuildMusicManager(event.getGuild()).player.setVolume(10);
-            }
-        }
-        //Just grabs the music manager and adjusts the volume
-        else if (args[0].equalsIgnoreCase(main.prefix + "volup")) {
-            PlayerManager manager = PlayerManager.getINSTANCE();
-            manager.getGuildMusicManager(event.getGuild()).player.setVolume(manager.getGuildMusicManager(event.getGuild()).player.getVolume() + 10);
-        }
-        //Same thing as above but subtracts the volume as opposed to adding to it
-        else if (args[0].equalsIgnoreCase(main.prefix + "voldown")) {
-            PlayerManager manager = PlayerManager.getINSTANCE();
-            manager.getGuildMusicManager(event.getGuild()).player.setVolume(manager.getGuildMusicManager(event.getGuild()).player.getVolume() - 10);
-        }
-        //Closes the connection to the voice chat/audio channel
-        else if (args[0].equalsIgnoreCase(main.prefix + "disconnect") || args[0].equalsIgnoreCase(main.prefix + "dis")) {
-            AudioManager audioManager = event.getGuild().getAudioManager();
-            audioManager.closeAudioConnection();
-        }
-        //Sends message letting the user know the song has been skipped, and then runs the nextTrack function from my TrackScheduler class
-        else if (args[0].equalsIgnoreCase(main.prefix + "skip")) {
-            TextChannel channel = event.getChannel();
-            PlayerManager playerManager = PlayerManager.getINSTANCE();
-            GuildMusicManager musicManager = playerManager.getGuildMusicManager(event.getGuild());
-            event.getChannel().sendMessage("Skipped " + musicManager.player.getPlayingTrack().getInfo().title).queue();
-            musicManager.scheduler.nextTrack();
-
-        }
-        //Sends current music queue as well as the currently playing song, it took me forever to figure out how to properly implement this
-        //The queue was created as a BlockingQueue in TrackScheduler, originally it was a linked list but I had issues with that
-        else if (args[0].equalsIgnoreCase(main.prefix + "queue")) {
-            PlayerManager playerManager = PlayerManager.getINSTANCE();
-            GuildMusicManager musicManager = playerManager.getGuildMusicManager(event.getGuild());
-            if (musicManager.player.getPlayingTrack() != null) {
-                StringBuilder toSend = new StringBuilder("Biggus Dickus" + ""
-                        + " Currently playing:"
-                        + "\n"
-                        + "```"
-                        + (musicManager.player.getPlayingTrack().getInfo().title + "")
-                        + "```"
-                        + "\n");
-                if (musicManager.scheduler.getList().size() > 0) {
-                    toSend.append("Upcoming songs:"
-                            + "\n"
-                            + "```");
-                    ArrayList<AudioTrack> list = musicManager.scheduler.getList();
-                    for (int i = 0; i < list.size(); i++) {
-                        toSend.append("\n" + musicManager.scheduler.GetTrackInfo(list.get(i)));
+        if (args[0].equalsIgnoreCase(main.prefix)) {
+            switch (args[1]) {
+                case "help":
+                    if (args.length >= 3) {
+                        if (args[2].equalsIgnoreCase("2")) {
+                            EmbedBuilder pg2 = new EmbedBuilder();
+                            pg2.setColor(Color.red);
+                            pg2.setTitle("This is the help screen of the bot (2)");
+                            pg2.setDescription("**!r clear** ```- Empties the song queue```" +
+                                    "**!r stop** ```- Stops the currently playing track```" +
+                                    "**!r dog** ```- Sends a random image of a dog```" +
+                                    "**!r cat** ```- Sends a random image of a cat```" +
+                                    "**!r fox** ```- Sends a random image of a fox```" +
+                                    "**!r duck** ```- Sends a random image of a duck```" +
+                                    "**!r meme** ```- Sends a random meme sourced from r/dankmemes```" +
+                                    "**!r panda** ```- Sends a random image of a panda```" +
+                                    "**!r redpanda** ```- Sends a random image of a red panda```");
+                            pg2.setAuthor("Biggus Dickus");
+                            event.getChannel().sendMessage(pg2.build()).queue();
+                            break;
+                        }
                     }
-                    toSend.append("```");
-                    event.getChannel().sendMessage(toSend).queue();
-                } else {
-                    toSend.append("There are no songs currently queued");
-                    event.getChannel().sendMessage(toSend.toString()).queue();
-                }
-            }
+                    else {
+                        EmbedBuilder help = new EmbedBuilder();
+                        help.setColor(Color.red);
+                        help.setTitle("This is the help screen of the bot (1)");
+                        help.setDescription("**!r ping** ```- This will send a ping to Biggus Dickus and it will respond if it is still alive.```" +
+                                "**!r info** ```- This gives you info about the bot```" +
+                                "**!r print** ```- Prints your message in a code block (!r print yes YOURMESSAGE will delete your command execution)```" +
+                                "**!r pp** ```- Clone of the 'pp' feature from the dank memer bot (Big meme :tm:)```" +
+                                "**!r eightball or !r8ball** ```- A magic eightball. Seek answers and you shall receive```" +
+                                "**!r play** ```- Plays a song from a specified url (Use !rplay search SEARCHTERM to search YouTube for a specific song)```" +
+                                "**!r volup** ```- Turns volume up by 10```" +
+                                "**!r voldown** ```- Turns volume down by 10```" +
+                                "**!r disconnect or !r dis** ```- Disconnects the bot from the audio channel it is currently connected to```" +
+                                "**!r queue** ```- Checks the currently queued songs ('!r help 2' takes you to page 2)```");
+                        help.setAuthor("Biggus Dickus");
+                        event.getChannel().sendMessage(help.build()).queue();
+                        break;
+                    }
 
-        }
-        //Runs the clear function from TrackScheduler (This just does queue.clear() )
-        else if (args[0].equalsIgnoreCase(main.prefix + "clear")) {
-            PlayerManager playerManager = PlayerManager.getINSTANCE();
-            GuildMusicManager musicManager = playerManager.getGuildMusicManager(event.getGuild());
-            musicManager.scheduler.clear();
-            event.getChannel().sendMessage("Queue has been cleared!").queue();
-        }
-        //This stops the current track
-        else if (args[0].equalsIgnoreCase(main.prefix + "stop")) {
-            PlayerManager playerManager = PlayerManager.getINSTANCE();
-            GuildMusicManager musicManager = playerManager.getGuildMusicManager(event.getGuild());
-            event.getChannel().sendMessage(musicManager.player.getPlayingTrack().getInfo().title + " has been stopped");
-            musicManager.player.stopTrack();
-        }
-        //All of the classes within the image package use very similar code, and could honestly have been condensed into OOP code with overrides. However
-        //subjectively I felt this was a cleaner approach/looked better, as it would be weird in my opinion to have everything inherit from a parent "imagesample" class
-        else if (args[0].equalsIgnoreCase(main.prefix + "fox")){
-            event.getChannel().sendMessage(getFox()).queue();
-        }
-        else if (args[0].equalsIgnoreCase(main.prefix + "cat")){
-            event.getChannel().sendMessage(getCat()).queue();
-        }
-        else if (args[0].equalsIgnoreCase(main.prefix + "dog")){
-            event.getChannel().sendMessage(getDog()).queue();
-        }
-        else if (args[0].equalsIgnoreCase(main.prefix + "meme")){
-            event.getChannel().sendMessage(getMeme()).queue();
-        }
-        else if (args[0].equalsIgnoreCase(main.prefix + "duck")){
-            event.getChannel().sendMessage(getDuck()).queue();
-        }
-        else if (args[0].equalsIgnoreCase(main.prefix + "panda")){
-            event.getChannel().sendMessage(getPanda()).queue();
-        }
-        else if (args[0].equalsIgnoreCase(main.prefix + "redpanda")){
-            event.getChannel().sendMessage(getRPanda()).queue();
-        }
-        //If your command prefix !r is given with no args, it gives you a help screen.
-        else if (args[0].equalsIgnoreCase(main.prefix)){
-            EmbedBuilder help = new EmbedBuilder();
-            help.setColor(Color.red);
-            help.setTitle("This is the help screen of the bot (1)");
-            help.setDescription("**!rping** ```- This will send a ping to Biggus Dickus and it will respond if it is still alive.```" +
-                    "**!rinfo** ```- This gives you info about the bot```" +
-                    "**!rprint** ```- Prints your message in a code block (!rprint yes YOURMESSAGE will delete your command execution)```" +
-                    "**!rpp** ```- Clone of the 'pp' feature from the dank memer bot (Big meme :tm:)```" +
-                    "**!reightball or !r8ball** ```- A magic eightball. Seek answers and you shall receive```" +
-                    "**!rplay** ```- Plays a song from a specified url (Use !rplay search SEARCHTERM to search YouTube for a specific song)```" +
-                    "**!rvolup** ```- Turns volume up by 10```" +
-                    "**!rvoldown** ```- Turns volume down by 10```" +
-                    "**!rdisconnect or !rdis** ```- Disconnects the bot from the audio channel it is currently connected to```" +
-                    "**!rqueue** ```- Checks the currently queued songs (!r2 takes you to page 2)```");
-            help.setAuthor("Biggus Dickus");
-            event.getChannel().sendMessage(help.build()).queue();
-        }
-        // !r2 gives you page two of my help screen
-        else if (args[0].equalsIgnoreCase(main.prefix + "2")){
-                EmbedBuilder help = new EmbedBuilder();
-                help.setColor(Color.red);
-                help.setTitle("This is the help screen of the bot (2)");
-                help.setDescription("**!rclear** ```- Empties the song queue```" +
-                        "**!rstop** ```- Stops the currently playing track```" +
-                        "**!rdog** ```- Sends a random image of a dog```" +
-                        "**!rcat** ```- Sends a random image of a cat```" +
-                        "**!rfox** ```- Sends a random image of a fox```" +
-                        "**!rduck** ```- Sends a random image of a duck```" +
-                        "**!rmeme** ```- Sends a random meme sourced from r/dankmemes```" +
-                        "**!rpanda** ```- Sends a random image of a panda```" +
-                        "**!rredpanda** ```- Sends a random image of a red panda```");
-                help.setAuthor("Biggus Dickus");
-                event.getChannel().sendMessage(help.build()).queue();
+                        case "ping":
+                            event.getChannel().sendMessage("pong! Biggus Dickus lives on").queue();
+                            break;
+                        case "info":
+                            EmbedBuilder info = new EmbedBuilder();
+                            info.setColor(Color.red);
+                            info.setTitle("Biggus Dickus Bot version 2.0");
+                            info.setColor(Color.cyan);
+                            info.setDescription("Bot is still in active development and as such there may be bugs. Please report any and all issues on my Github." +
+                                    "But also check for duplicates beforehand in case I was already made aware of your issue. [Github can be found here](https://github.com/TCU14/BiggusDickus)");
+                            info.setAuthor("Red The Moron");
+                            event.getChannel().sendMessage(info.build()).queue();
+                            info.clear();
+                            break;
+                        case "print":
+                            if (args[2].equalsIgnoreCase("yes")) {
+                                event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(13) + "```").queue();
+                                event.getMessage().delete().queue();
+                                break;
+                            }
+                            else {
+                                event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(9) + "```").queue();
+                                break;
+                            }
+                        case "pp":
+                            EmbedBuilder newpp = new EmbedBuilder();
+                            int pplength = 0;
+                            String len = "";
+                            Random random = new Random();
+                            pplength = random.nextInt(13);
+                            len = new String(new char[pplength]).replace("\0", "=");
+                            newpp.setColor(Color.red);
+                            newpp.setTitle(event.getAuthor().getName() + "'s pp");
+                            newpp.setDescription("8" + len + "D");
+                            event.getChannel().sendMessage(newpp.build()).queue();
+                            break;
+                        case "eightball":
+                        case "8ball":
+                            String[] responses = {"It is certain", "Without a doubt", "You may rely on it", "Yes definitely", "It is decidedly so",
+                                    "As I see it, yes", "Most likely", "Yes", "Outlook good", "Signs point to yes", "Reply hazy try again",
+                                    "Better not tell you now", "Ask again later", "Cannot predict now", "Concentrate and ask again",
+                                    "Don’t count on it", "Outlook not so good", "My sources say no", "Very doubtful", "My reply is no"};
+                            Random r = new Random();
+                            int answer = 0;
+                            answer = r.nextInt(20);
+                            event.getChannel().sendMessage(responses[answer]).queue();
+                            break;
+                        case "play":
+                            if (args[2].equalsIgnoreCase("search")) {
+                                PlayerManager manager = PlayerManager.getINSTANCE();
+                                VoiceChannel connectedChannel = event.getMember().getVoiceState().getChannel();
+                                AudioManager audioManager = event.getGuild().getAudioManager();
+                                audioManager.openAudioConnection(connectedChannel);
+                                String Query = "";
+                                Query = event.getMessage().getContentRaw().substring(14);
+                                manager.LoadAndPlay(event.getChannel(), "ytsearch:" + Query);
+                                break;
+
+                            } else {
+                                PlayerManager manager = PlayerManager.getINSTANCE();
+                                VoiceChannel connectedChannel = event.getMember().getVoiceState().getChannel();
+                                AudioManager audioManager = event.getGuild().getAudioManager();
+                                audioManager.openAudioConnection(connectedChannel);
+                                manager.LoadAndPlay(event.getChannel(), args[1]);
+                                manager.getGuildMusicManager(event.getGuild()).player.setVolume(10);
+                                break;
+                            }
+                        case "volup":
+                            PlayerManager manager = PlayerManager.getINSTANCE();
+                            manager.getGuildMusicManager(event.getGuild()).player.setVolume(manager.getGuildMusicManager(event.getGuild()).player.getVolume() + 10);
+                            break;
+                        case "voldown":
+                            PlayerManager manager1 = PlayerManager.getINSTANCE();
+                            manager1.getGuildMusicManager(event.getGuild()).player.setVolume(manager1.getGuildMusicManager(event.getGuild()).player.getVolume() - 10);
+                            break;
+                        case "disconnect": case "dis":
+                            AudioManager audioManager = event.getGuild().getAudioManager();
+                            audioManager.closeAudioConnection();
+                            break;
+                        case "skip":
+                            TextChannel channel = event.getChannel();
+                            PlayerManager playerManager = PlayerManager.getINSTANCE();
+                            GuildMusicManager musicManager = playerManager.getGuildMusicManager(event.getGuild());
+                            event.getChannel().sendMessage("Skipped " + musicManager.player.getPlayingTrack().getInfo().title).queue();
+                            musicManager.scheduler.nextTrack();
+                            break;
+                        case "queue":
+                            PlayerManager playerManager1 = PlayerManager.getINSTANCE();
+                            GuildMusicManager musicManager1 = playerManager1.getGuildMusicManager(event.getGuild());
+                            if (musicManager1.player.getPlayingTrack() != null) {
+                                StringBuilder toSend = new StringBuilder("Biggus Dickus" + ""
+                                        + " Currently playing:"
+                                        + "\n"
+                                        + "```"
+                                        + (musicManager1.player.getPlayingTrack().getInfo().title + "")
+                                        + "```"
+                                        + "\n");
+                                if (musicManager1.scheduler.getList().size() > 0) {
+                                    toSend.append("Upcoming songs:"
+                                            + "\n"
+                                            + "```");
+                                    ArrayList<AudioTrack> list = musicManager1.scheduler.getList();
+                                    for (int i = 0; i < list.size(); i++) {
+                                        toSend.append("\n" + musicManager1.scheduler.GetTrackInfo(list.get(i)));
+                                    }
+                                    toSend.append("```");
+                                    event.getChannel().sendMessage(toSend).queue();
+                                    break;
+                                } else {
+                                    toSend.append("There are no songs currently queued");
+                                    event.getChannel().sendMessage(toSend.toString()).queue();
+                                    break;
+                                }
+                            }
+                        case "clear":
+                            PlayerManager playerManager2 = PlayerManager.getINSTANCE();
+                            GuildMusicManager musicManager2 = playerManager2.getGuildMusicManager(event.getGuild());
+                            musicManager2.scheduler.clear();
+                            event.getChannel().sendMessage("Queue has been cleared!").queue();
+                            break;
+                        case "stop":
+                            PlayerManager playerManager3 = PlayerManager.getINSTANCE();
+                            GuildMusicManager musicManager3 = playerManager3.getGuildMusicManager(event.getGuild());
+                            event.getChannel().sendMessage(musicManager3.player.getPlayingTrack().getInfo().title + " has been stopped");
+                            musicManager3.player.stopTrack();
+                        case "fox":
+                            event.getChannel().sendMessage(getFox()).queue();
+                            break;
+                        case "cat":
+                            event.getChannel().sendMessage(getCat()).queue();
+                            break;
+                        case "dog":
+                            event.getChannel().sendMessage(getDog()).queue();
+                            break;
+                        case "meme":
+                            event.getChannel().sendMessage(getMeme()).queue();
+                            break;
+                        case "duck":
+                            event.getChannel().sendMessage(getDuck()).queue();
+                            break;
+                        case "panda":
+                            event.getChannel().sendMessage(getPanda()).queue();
+                            break;
+                        case "redpanda":
+                            event.getChannel().sendMessage(getRPanda()).queue();
+                            break;
+
+                    }
+
+            }
         }
     }
-
-}

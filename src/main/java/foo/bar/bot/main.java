@@ -16,10 +16,10 @@ public class main {
     public static String prefix = "!r";
     public static void main(String[] args) throws LoginException {
         //You would add a token inside the "" below.
-        JDA jda = JDABuilder.createDefault("NzU1NDYzOTg5MDI2MzU3Mjk5.X2Dqqg.tYX8XkY5X8qEsW9Uqo-r_Nl7OZY").build();
+        JDA jda = JDABuilder.createDefault("").build();
         //Sets bots status to be Online and introduces user to command syntax via setting the activity
         jda.getPresence().setStatus(OnlineStatus.ONLINE);
-        jda.getPresence().setActivity(Activity.playing("!r (Life of Brian)"));
+        jda.getPresence().setActivity(Activity.playing("!r help (Life of Brian)"));
         //Add my Commands listener event
         jda.addEventListener(new Commands());
         //The bot is named this way because of Life of brian, which is why that's in the status. There is nothing funny about my good friend's name
