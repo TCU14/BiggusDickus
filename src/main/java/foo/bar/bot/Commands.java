@@ -15,9 +15,21 @@ import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.api.requests.RestAction;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.jetbrains.annotations.NotNull;
 
+import javax.imageio.ImageIO;
 import javax.sound.midi.Track;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.FileSystemNotFoundException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -32,6 +44,7 @@ import static foo.bar.bot.image.Fox.getFox;
 import static foo.bar.bot.image.Meme.getMeme;
 import static foo.bar.bot.image.Panda.getPanda;
 import static foo.bar.bot.image.RedPanda.getRPanda;
+import static foo.bar.bot.main.jda;
 
 public class Commands extends ListenerAdapter {
     public static void GenerateRandomPP() {
@@ -66,8 +79,10 @@ public class Commands extends ListenerAdapter {
                             event.getChannel().sendMessage(pg2.build()).queue();
                             break;
                         }
-                    }
-                    else {
+                        else {
+                            break;
+                        }
+                    } else {
                         EmbedBuilder help = new EmbedBuilder();
                         help.setColor(Color.red);
                         help.setTitle("This is the help screen of the bot (1)");
@@ -86,154 +101,159 @@ public class Commands extends ListenerAdapter {
                         break;
                     }
 
-                        case "ping":
-                            event.getChannel().sendMessage("pong! Biggus Dickus lives on").queue();
-                            break;
-                        case "info":
-                            EmbedBuilder info = new EmbedBuilder();
-                            info.setColor(Color.red);
-                            info.setTitle("Biggus Dickus Bot version 2.0");
-                            info.setColor(Color.cyan);
-                            info.setDescription("Bot is still in active development and as such there may be bugs. Please report any and all issues on my Github." +
-                                    "But also check for duplicates beforehand in case I was already made aware of your issue. [Github can be found here](https://github.com/TCU14/BiggusDickus)");
-                            info.setAuthor("Red The Moron");
-                            event.getChannel().sendMessage(info.build()).queue();
-                            info.clear();
-                            break;
-                        case "print":
-                            if (args[2].equalsIgnoreCase("yes")) {
-                                event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(13) + "```").queue();
-                                event.getMessage().delete().queue();
-                                break;
-                            }
-                            else {
-                                event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(9) + "```").queue();
-                                break;
-                            }
-                        case "pp":
-                            EmbedBuilder newpp = new EmbedBuilder();
-                            int pplength = 0;
-                            String len = "";
-                            Random random = new Random();
-                            pplength = random.nextInt(13);
-                            len = new String(new char[pplength]).replace("\0", "=");
-                            newpp.setColor(Color.red);
-                            newpp.setTitle(event.getAuthor().getName() + "'s pp");
-                            newpp.setDescription("8" + len + "D");
-                            event.getChannel().sendMessage(newpp.build()).queue();
-                            break;
-                        case "eightball":
-                        case "8ball":
-                            String[] responses = {"It is certain", "Without a doubt", "You may rely on it", "Yes definitely", "It is decidedly so",
-                                    "As I see it, yes", "Most likely", "Yes", "Outlook good", "Signs point to yes", "Reply hazy try again",
-                                    "Better not tell you now", "Ask again later", "Cannot predict now", "Concentrate and ask again",
-                                    "Don’t count on it", "Outlook not so good", "My sources say no", "Very doubtful", "My reply is no"};
-                            Random r = new Random();
-                            int answer = 0;
-                            answer = r.nextInt(20);
-                            event.getChannel().sendMessage(responses[answer]).queue();
-                            break;
-                        case "play":
-                            if (args[2].equalsIgnoreCase("search")) {
-                                PlayerManager manager = PlayerManager.getINSTANCE();
-                                VoiceChannel connectedChannel = event.getMember().getVoiceState().getChannel();
-                                AudioManager audioManager = event.getGuild().getAudioManager();
-                                audioManager.openAudioConnection(connectedChannel);
-                                String Query = "";
-                                Query = event.getMessage().getContentRaw().substring(14);
-                                manager.LoadAndPlay(event.getChannel(), "ytsearch:" + Query);
-                                break;
-
-                            } else {
-                                PlayerManager manager = PlayerManager.getINSTANCE();
-                                VoiceChannel connectedChannel = event.getMember().getVoiceState().getChannel();
-                                AudioManager audioManager = event.getGuild().getAudioManager();
-                                audioManager.openAudioConnection(connectedChannel);
-                                manager.LoadAndPlay(event.getChannel(), args[1]);
-                                manager.getGuildMusicManager(event.getGuild()).player.setVolume(10);
-                                break;
-                            }
-                        case "volup":
-                            PlayerManager manager = PlayerManager.getINSTANCE();
-                            manager.getGuildMusicManager(event.getGuild()).player.setVolume(manager.getGuildMusicManager(event.getGuild()).player.getVolume() + 10);
-                            break;
-                        case "voldown":
-                            PlayerManager manager1 = PlayerManager.getINSTANCE();
-                            manager1.getGuildMusicManager(event.getGuild()).player.setVolume(manager1.getGuildMusicManager(event.getGuild()).player.getVolume() - 10);
-                            break;
-                        case "disconnect": case "dis":
-                            AudioManager audioManager = event.getGuild().getAudioManager();
-                            audioManager.closeAudioConnection();
-                            break;
-                        case "skip":
-                            TextChannel channel = event.getChannel();
-                            PlayerManager playerManager = PlayerManager.getINSTANCE();
-                            GuildMusicManager musicManager = playerManager.getGuildMusicManager(event.getGuild());
-                            event.getChannel().sendMessage("Skipped " + musicManager.player.getPlayingTrack().getInfo().title).queue();
-                            musicManager.scheduler.nextTrack();
-                            break;
-                        case "queue":
-                            PlayerManager playerManager1 = PlayerManager.getINSTANCE();
-                            GuildMusicManager musicManager1 = playerManager1.getGuildMusicManager(event.getGuild());
-                            if (musicManager1.player.getPlayingTrack() != null) {
-                                StringBuilder toSend = new StringBuilder("Biggus Dickus" + ""
-                                        + " Currently playing:"
-                                        + "\n"
-                                        + "```"
-                                        + (musicManager1.player.getPlayingTrack().getInfo().title + "")
-                                        + "```"
-                                        + "\n");
-                                if (musicManager1.scheduler.getList().size() > 0) {
-                                    toSend.append("Upcoming songs:"
-                                            + "\n"
-                                            + "```");
-                                    ArrayList<AudioTrack> list = musicManager1.scheduler.getList();
-                                    for (int i = 0; i < list.size(); i++) {
-                                        toSend.append("\n" + musicManager1.scheduler.GetTrackInfo(list.get(i)));
-                                    }
-                                    toSend.append("```");
-                                    event.getChannel().sendMessage(toSend).queue();
-                                    break;
-                                } else {
-                                    toSend.append("There are no songs currently queued");
-                                    event.getChannel().sendMessage(toSend.toString()).queue();
-                                    break;
-                                }
-                            }
-                        case "clear":
-                            PlayerManager playerManager2 = PlayerManager.getINSTANCE();
-                            GuildMusicManager musicManager2 = playerManager2.getGuildMusicManager(event.getGuild());
-                            musicManager2.scheduler.clear();
-                            event.getChannel().sendMessage("Queue has been cleared!").queue();
-                            break;
-                        case "stop":
-                            PlayerManager playerManager3 = PlayerManager.getINSTANCE();
-                            GuildMusicManager musicManager3 = playerManager3.getGuildMusicManager(event.getGuild());
-                            event.getChannel().sendMessage(musicManager3.player.getPlayingTrack().getInfo().title + " has been stopped");
-                            musicManager3.player.stopTrack();
-                        case "fox":
-                            event.getChannel().sendMessage(getFox()).queue();
-                            break;
-                        case "cat":
-                            event.getChannel().sendMessage(getCat()).queue();
-                            break;
-                        case "dog":
-                            event.getChannel().sendMessage(getDog()).queue();
-                            break;
-                        case "meme":
-                            event.getChannel().sendMessage(getMeme()).queue();
-                            break;
-                        case "duck":
-                            event.getChannel().sendMessage(getDuck()).queue();
-                            break;
-                        case "panda":
-                            event.getChannel().sendMessage(getPanda()).queue();
-                            break;
-                        case "redpanda":
-                            event.getChannel().sendMessage(getRPanda()).queue();
-                            break;
-
+                case "ping":
+                    event.getChannel().sendMessage("pong! Biggus Dickus lives on").queue();
+                    break;
+                case "info":
+                    EmbedBuilder info = new EmbedBuilder();
+                    info.setColor(Color.red);
+                    info.setTitle("Biggus Dickus Bot version 2.0");
+                    info.setColor(Color.cyan);
+                    info.setDescription("Bot is still in active development and as such there may be bugs. Please report any and all issues on my Github." +
+                            "But also check for duplicates beforehand in case I was already made aware of your issue. [Github can be found here](https://github.com/TCU14/BiggusDickus)");
+                    info.setAuthor("Red The Moron");
+                    event.getChannel().sendMessage(info.build()).queue();
+                    info.clear();
+                    break;
+                case "print":
+                    if (args[2].equalsIgnoreCase("yes")) {
+                        event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(13) + "```").queue();
+                        event.getMessage().delete().queue();
+                        break;
+                    } else {
+                        event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(9) + "```").queue();
+                        break;
                     }
+                case "pp":
+                    EmbedBuilder newpp = new EmbedBuilder();
+                    int pplength = 0;
+                    String len = "";
+                    Random random = new Random();
+                    pplength = random.nextInt(13);
+                    len = new String(new char[pplength]).replace("\0", "=");
+                    newpp.setColor(Color.red);
+                    newpp.setTitle(event.getAuthor().getName() + "'s pp");
+                    newpp.setDescription("8" + len + "D");
+                    event.getChannel().sendMessage(newpp.build()).queue();
+                    break;
+                case "eightball":
+                case "8ball":
+                    String[] responses = {"It is certain", "Without a doubt", "You may rely on it", "Yes definitely", "It is decidedly so",
+                            "As I see it, yes", "Most likely", "Yes", "Outlook good", "Signs point to yes", "Reply hazy try again",
+                            "Better not tell you now", "Ask again later", "Cannot predict now", "Concentrate and ask again",
+                            "Don’t count on it", "Outlook not so good", "My sources say no", "Very doubtful", "My reply is no"};
+                    Random r = new Random();
+                    int answer = 0;
+                    answer = r.nextInt(20);
+                    event.getChannel().sendMessage(responses[answer]).queue();
+                    break;
+                case "play":
+                    if (args[2].equalsIgnoreCase("search")) {
+                        PlayerManager manager = PlayerManager.getINSTANCE();
+                        VoiceChannel connectedChannel = event.getMember().getVoiceState().getChannel();
+                        AudioManager audioManager = event.getGuild().getAudioManager();
+                        audioManager.openAudioConnection(connectedChannel);
+                        String Query = "";
+                        Query = event.getMessage().getContentRaw().substring(14);
+                        manager.LoadAndPlay(event.getChannel(), "ytsearch:" + Query);
+                        break;
+
+                    } else {
+                        PlayerManager manager = PlayerManager.getINSTANCE();
+                        VoiceChannel connectedChannel = event.getMember().getVoiceState().getChannel();
+                        AudioManager audioManager = event.getGuild().getAudioManager();
+                        audioManager.openAudioConnection(connectedChannel);
+                        manager.LoadAndPlay(event.getChannel(), args[2]);
+                        manager.getGuildMusicManager(event.getGuild()).player.setVolume(10);
+                        break;
+                    }
+                case "volup":
+                    PlayerManager manager = PlayerManager.getINSTANCE();
+                    manager.getGuildMusicManager(event.getGuild()).player.setVolume(manager.getGuildMusicManager(event.getGuild()).player.getVolume() + 10);
+                    break;
+                case "voldown":
+                    PlayerManager manager1 = PlayerManager.getINSTANCE();
+                    manager1.getGuildMusicManager(event.getGuild()).player.setVolume(manager1.getGuildMusicManager(event.getGuild()).player.getVolume() - 10);
+                    break;
+                case "disconnect":
+                case "dis":
+                    AudioManager audioManager = event.getGuild().getAudioManager();
+                    audioManager.closeAudioConnection();
+                    break;
+                case "skip":
+                    TextChannel channel = event.getChannel();
+                    PlayerManager playerManager = PlayerManager.getINSTANCE();
+                    GuildMusicManager musicManager = playerManager.getGuildMusicManager(event.getGuild());
+                    event.getChannel().sendMessage("Skipped " + musicManager.player.getPlayingTrack().getInfo().title).queue();
+                    musicManager.scheduler.nextTrack();
+                    break;
+                case "queue":
+                    PlayerManager playerManager1 = PlayerManager.getINSTANCE();
+                    GuildMusicManager musicManager1 = playerManager1.getGuildMusicManager(event.getGuild());
+                    if (musicManager1.player.getPlayingTrack() != null) {
+                        StringBuilder toSend = new StringBuilder("Biggus Dickus" + ""
+                                + " Currently playing:"
+                                + "\n"
+                                + "```"
+                                + (musicManager1.player.getPlayingTrack().getInfo().title + "")
+                                + "```"
+                                + "\n");
+                        if (musicManager1.scheduler.getList().size() > 0) {
+                            toSend.append("Upcoming songs:"
+                                    + "\n"
+                                    + "```");
+                            ArrayList<AudioTrack> list = musicManager1.scheduler.getList();
+                            for (int i = 0; i < list.size(); i++) {
+                                toSend.append("\n" + musicManager1.scheduler.GetTrackInfo(list.get(i)));
+                            }
+                            toSend.append("```");
+                            event.getChannel().sendMessage(toSend).queue();
+                            break;
+                        } else {
+                            toSend.append("There are no songs currently queued");
+                            event.getChannel().sendMessage(toSend.toString()).queue();
+                            break;
+                        }
+                    }
+                    else {
+                        event.getChannel().sendMessage("There are no songs queued or playing right now!").queue();
+                        break;
+                    }
+                case "clear":
+                    PlayerManager playerManager2 = PlayerManager.getINSTANCE();
+                    GuildMusicManager musicManager2 = playerManager2.getGuildMusicManager(event.getGuild());
+                    musicManager2.scheduler.clear();
+                    event.getChannel().sendMessage("Queue has been cleared!").queue();
+                    break;
+                case "stop":
+                    PlayerManager playerManager3 = PlayerManager.getINSTANCE();
+                    GuildMusicManager musicManager3 = playerManager3.getGuildMusicManager(event.getGuild());
+                    event.getChannel().sendMessage(musicManager3.player.getPlayingTrack().getInfo().title + " has been stopped");
+                    musicManager3.player.stopTrack();
+                    break;
+                case "fox":
+                    event.getChannel().sendMessage(getFox()).queue();
+                    break;
+                case "cat":
+                    event.getChannel().sendMessage(getCat()).queue();
+                    break;
+                case "dog":
+                    event.getChannel().sendMessage(getDog()).queue();
+                    break;
+                case "meme":
+                    event.getChannel().sendMessage(getMeme()).queue();
+                    break;
+                case "duck":
+                    event.getChannel().sendMessage(getDuck()).queue();
+                    break;
+                case "panda":
+                    event.getChannel().sendMessage(getPanda()).queue();
+                    break;
+                case "redpanda":
+                    event.getChannel().sendMessage(getRPanda()).queue();
+                    break;
+
+            }
 
             }
         }
