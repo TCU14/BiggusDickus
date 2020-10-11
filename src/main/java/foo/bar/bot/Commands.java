@@ -37,13 +37,8 @@ import java.util.Random;
 import java.awt.*;
 import java.util.concurrent.BlockingQueue;
 
-import static foo.bar.bot.image.Cat.getCat;
-import static foo.bar.bot.image.Dog.getDog;
-import static foo.bar.bot.image.Duck.getDuck;
-import static foo.bar.bot.image.Fox.getFox;
-import static foo.bar.bot.image.Meme.getMeme;
-import static foo.bar.bot.image.Panda.getPanda;
-import static foo.bar.bot.image.RedPanda.getRPanda;
+
+import static foo.bar.bot.API.getResponse.getAPI;
 import static foo.bar.bot.main.jda;
 
 public class Commands extends ListenerAdapter {
@@ -65,7 +60,7 @@ public class Commands extends ListenerAdapter {
                         if (args[2].equalsIgnoreCase("2")) {
                             EmbedBuilder pg2 = new EmbedBuilder();
                             pg2.setColor(Color.red);
-                            pg2.setTitle("This is the help screen of the bot (2)");
+                            pg2.setTitle("This is the help screen of the bot (2/3)");
                             pg2.setDescription("**!r clear** ```- Empties the song queue```" +
                                     "**!r stop** ```- Stops the currently playing track```" +
                                     "**!r dog** ```- Sends a random image of a dog```" +
@@ -74,9 +69,19 @@ public class Commands extends ListenerAdapter {
                                     "**!r duck** ```- Sends a random image of a duck```" +
                                     "**!r meme** ```- Sends a random meme sourced from r/dankmemes```" +
                                     "**!r panda** ```- Sends a random image of a panda```" +
-                                    "**!r redpanda** ```- Sends a random image of a red panda```");
+                                    "**!r redpanda** ```- Sends a random image of a red panda```" +
+                                    "**!r pfp** ```- Sends a fake profile picture. Privacy ftw!```");
                             pg2.setAuthor("Biggus Dickus");
                             event.getChannel().sendMessage(pg2.build()).queue();
+                            break;
+                        }
+                        else if (args[2].equalsIgnoreCase("3")){
+                            EmbedBuilder pg3 = new EmbedBuilder();
+                            pg3.setColor(Color.red);
+                            pg3.setTitle("This is the help screen of the bot (3/3)");
+                            pg3.setDescription("**!r catfact (or !r cf)** ```- Sends a catfact```");
+                            pg3.setAuthor("Biggus Dickus");
+                            event.getChannel().sendMessage(pg3.build()).queue();
                             break;
                         }
                         else {
@@ -85,7 +90,7 @@ public class Commands extends ListenerAdapter {
                     } else {
                         EmbedBuilder help = new EmbedBuilder();
                         help.setColor(Color.red);
-                        help.setTitle("This is the help screen of the bot (1)");
+                        help.setTitle("This is the help screen of the bot (1/3)");
                         help.setDescription("**!r ping** ```- This will send a ping to Biggus Dickus and it will respond if it is still alive.```" +
                                 "**!r info** ```- This gives you info about the bot```" +
                                 "**!r print** ```- Prints your message in a code block (!r print yes YOURMESSAGE will delete your command execution)```" +
@@ -175,8 +180,7 @@ public class Commands extends ListenerAdapter {
                     PlayerManager manager1 = PlayerManager.getINSTANCE();
                     manager1.getGuildMusicManager(event.getGuild()).player.setVolume(manager1.getGuildMusicManager(event.getGuild()).player.getVolume() - 10);
                     break;
-                case "disconnect":
-                case "dis":
+                case "disconnect": case "dis":
                     AudioManager audioManager = event.getGuild().getAudioManager();
                     audioManager.closeAudioConnection();
                     break;
@@ -209,7 +213,8 @@ public class Commands extends ListenerAdapter {
                             toSend.append("```");
                             event.getChannel().sendMessage(toSend).queue();
                             break;
-                        } else {
+                        }
+                        else {
                             toSend.append("There are no songs currently queued");
                             event.getChannel().sendMessage(toSend.toString()).queue();
                             break;
@@ -232,27 +237,32 @@ public class Commands extends ListenerAdapter {
                     musicManager3.player.stopTrack();
                     break;
                 case "fox":
-                    event.getChannel().sendMessage(getFox()).queue();
+                    event.getChannel().sendMessage(getAPI("https://randomfox.ca/floof/", "image")).queue();
                     break;
                 case "cat":
-                    event.getChannel().sendMessage(getCat()).queue();
+                    event.getChannel().sendMessage(getAPI("http://aws.random.cat/meow", "file")).queue();
                     break;
                 case "dog":
-                    event.getChannel().sendMessage(getDog()).queue();
+                    event.getChannel().sendMessage(getAPI("https://dog.ceo/api/breeds/image/random", "message")).queue();
                     break;
                 case "meme":
-                    event.getChannel().sendMessage(getMeme()).queue();
+                    event.getChannel().sendMessage(getAPI("https://meme-api.herokuapp.com/gimme/dankmemes", "url")).queue();
                     break;
                 case "duck":
-                    event.getChannel().sendMessage(getDuck()).queue();
+                    event.getChannel().sendMessage(getAPI("https://random-d.uk/api/random", "url")).queue();
                     break;
                 case "panda":
-                    event.getChannel().sendMessage(getPanda()).queue();
+                    event.getChannel().sendMessage(getAPI("https://some-random-api.ml/img/panda", "link")).queue();
                     break;
                 case "redpanda":
-                    event.getChannel().sendMessage(getRPanda()).queue();
+                    event.getChannel().sendMessage(getAPI("https://some-random-api.ml/img/red_panda", "link")).queue();
                     break;
-
+                case "pfp":
+                    event.getChannel().sendMessage(getAPI("https://fakeface.rest/face/json", "image_url")).queue();
+                    break;
+                case "catfact": case "cf":
+                    event.getChannel().sendMessage(getAPI("https://catfact.ninja/fact", "fact")).queue();
+                    break;
             }
 
             }

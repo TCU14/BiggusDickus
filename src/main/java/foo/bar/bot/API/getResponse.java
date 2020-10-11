@@ -1,12 +1,13 @@
-package foo.bar.bot.image;
+package foo.bar.bot.API;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-public class Fox {
+public class getResponse {
     private static String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();
         int cp;
@@ -28,13 +29,13 @@ public class Fox {
         }
     }
 
-    public static String getFox() {
+    public static String getAPI(String URL, String string) {
 
         String outputMessage = null; //Might be redudant
         JSONObject json = null; //Might be redudant
         try {
-            json = readJsonFromUrl("https://randomfox.ca/floof/");
-            outputMessage = json.getString("image");
+            json = readJsonFromUrl(URL);
+            outputMessage = json.getString(string);
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
