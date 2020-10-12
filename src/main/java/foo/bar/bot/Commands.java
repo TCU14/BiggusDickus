@@ -28,8 +28,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.FileSystemNotFoundException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -46,6 +48,18 @@ public class Commands extends ListenerAdapter {
         int pplength = 0;
         Random random = new Random();
         pplength = random.nextInt(13);
+    }
+    public static String getFinalURL(String url) throws IOException {
+        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+        con.setInstanceFollowRedirects(false);
+        con.connect();
+        con.getInputStream();
+
+        if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM || con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP) {
+            String redirectUrl = con.getHeaderField("Location");
+            return getFinalURL(redirectUrl);
+        }
+        return url;
     }
 
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
@@ -74,8 +88,7 @@ public class Commands extends ListenerAdapter {
                             pg2.setAuthor("Biggus Dickus");
                             event.getChannel().sendMessage(pg2.build()).queue();
                             break;
-                        }
-                        else if (args[2].equalsIgnoreCase("3")){
+                        } else if (args[2].equalsIgnoreCase("3")) {
                             EmbedBuilder pg3 = new EmbedBuilder();
                             pg3.setColor(Color.red);
                             pg3.setTitle("This is the help screen of the bot (3/3)");
@@ -83,8 +96,7 @@ public class Commands extends ListenerAdapter {
                             pg3.setAuthor("Biggus Dickus");
                             event.getChannel().sendMessage(pg3.build()).queue();
                             break;
-                        }
-                        else {
+                        } else {
                             break;
                         }
                     } else {
@@ -180,7 +192,8 @@ public class Commands extends ListenerAdapter {
                     PlayerManager manager1 = PlayerManager.getINSTANCE();
                     manager1.getGuildMusicManager(event.getGuild()).player.setVolume(manager1.getGuildMusicManager(event.getGuild()).player.getVolume() - 10);
                     break;
-                case "disconnect": case "dis":
+                case "disconnect":
+                case "dis":
                     AudioManager audioManager = event.getGuild().getAudioManager();
                     audioManager.closeAudioConnection();
                     break;
@@ -213,14 +226,12 @@ public class Commands extends ListenerAdapter {
                             toSend.append("```");
                             event.getChannel().sendMessage(toSend).queue();
                             break;
-                        }
-                        else {
+                        } else {
                             toSend.append("There are no songs currently queued");
                             event.getChannel().sendMessage(toSend.toString()).queue();
                             break;
                         }
-                    }
-                    else {
+                    } else {
                         event.getChannel().sendMessage("There are no songs queued or playing right now!").queue();
                         break;
                     }
@@ -260,9 +271,19 @@ public class Commands extends ListenerAdapter {
                 case "pfp":
                     event.getChannel().sendMessage(getAPI("https://fakeface.rest/face/json", "image_url")).queue();
                     break;
-                case "catfact": case "cf":
+                case "catfact":
+                case "cf":
                     event.getChannel().sendMessage(getAPI("https://catfact.ninja/fact", "fact")).queue();
                     break;
+                case "4k":
+                    try {
+                        String messageContent = getFinalURL("https://source.unsplash.com/random/3840x2160");
+                        event.getChannel().sendMessage(messageContent).queue();
+                        break;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        break;
+                    }
             }
 
             }
