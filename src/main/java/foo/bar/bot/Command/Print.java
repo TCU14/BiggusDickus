@@ -13,13 +13,30 @@ public class Print extends Command {
     @Override
     protected void execute(CommandEvent event) {
         String[] args = event.getMessage().getContentRaw().split("\\s+");
-        if (args[2].equalsIgnoreCase("yes")) {
-            event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(13) + "```").queue();
-            event.getMessage().delete().queue();
 
-        } else {
-            event.getChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(9) + "```").queue();
-
+        switch (args[0]) {
+            case "!rprint":
+                switch (args[1]){
+                    case "yes":
+                        event.getTextChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(12) + "```").queue();
+                        event.getMessage().delete().queue();
+                        break;
+                    default:
+                        event.getTextChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(8) + "```").queue();
+                        break;
+                }
+                break;
+            case "!r":
+                switch (args[2]){
+                    case "yes":
+                        event.getTextChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(13) + "```").queue();
+                        event.getMessage().delete().queue();
+                        break;
+                    default:
+                        event.getTextChannel().sendMessage("```" + event.getMessage().getContentRaw().substring(9) + "```").queue();
+                        break;
+                }
+                break;
         }
     }
 }

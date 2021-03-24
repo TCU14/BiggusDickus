@@ -23,10 +23,12 @@ public class main {
         builder.setOwnerId("167430999095902208");
         builder.setActivity(Activity.playing("!r help (Life of Brian)"));
         //Add all my dogshit commands here in a way that seems very clunky but whatever
-        builder.addCommands(new Eightball(), new pp(), new Play(), new Ping(), new Info(), new VolumeUp(), new VolumeDown(), new Disconnect(), new Skip(), new Queue(), new Clear(), new Stop(), new Fox(), new Cat(), new Dog(), new Meme(), new Duck(), new Panda(), new RedPanda(), new ProfilePic(), new CatFact(), new FourKay());
+        builder.addCommands(new Eightball(), new pp(), new Play(), new Ping(), new Info(), new VolumeUp(), new VolumeDown(), new Disconnect(), new Skip());
+        builder.addCommands(new Queue(), new Clear(), new Stop(), new Fox(), new Cat(), new Dog(), new Meme(), new Duck(), new Panda(), new RedPanda());
+        builder.addCommands(new ProfilePic(), new CatFact(), new FourKay(), new newWord(), new Insult(), new Print());
         CommandClient client = builder.build();
         //You would add a token inside the "" below.
-        JDA jda = JDABuilder.createDefault("NzU2NzM2MjU2MTUwMzM5NTg0.X2WLjg.-GvHOThh_hSNzn3avoMpjdx5pXk").addEventListeners(client).build();
+        JDA jda = JDABuilder.createDefault("your token here").addEventListeners(client).build();
         //Sets bots status to be Online and introduces user to command syntax via setting the activity
         jda.getPresence().setStatus(OnlineStatus.ONLINE);
 
